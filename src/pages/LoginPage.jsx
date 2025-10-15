@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './loginpage.css';
-
+import './LoginPage.css';
+  
 export default function LoginPage() {
   const [mode, setMode] = useState('choice'); // 'choice' | 'user' | 'hotel'
   const [userMode, setUserMode] = useState('signin');
