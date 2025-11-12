@@ -55,11 +55,7 @@
   }
 }
 
-/* Buttons */
-.btn-danger {
-  background: linear-gradient(90deg, #ff6a3d, #ff3a00);
-  border: none;
-}
+
 
 /* Responsive */
 @media (max-width: 991px) {
@@ -73,4 +69,13 @@
   .login-box {
     width: 90%;
   }
+}
+.btn-warning {
+  background: linear-gradient(90deg, #ffd54f, #ffb300);
+  border: none;
+  color: #212121;
+}
+.btn-warning:hover {
+  background: linear-gradient(90deg, #ffca28, #ffa000);
+  color: #000;
 }

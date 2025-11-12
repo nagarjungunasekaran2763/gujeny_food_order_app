@@ -27,10 +27,10 @@ const HotelRegistration = () => {
     <div className="container-fluid bg-light min-vh-100 d-flex align-items-center justify-content-center">
       <div
         className="card p-5 shadow-lg border-0 rounded-4"
-        style={{ width: '500px' }}
+        style={{ width: '500px', backgroundColor: '#fffef7' }}
       >
-        <h3 className="text-center mb-4 text-danger fw-bold">
-          Hotel Registration
+        <h3 className="text-center mb-4 text-warning fw-bold">
+          🏨 Hotel Registration
         </h3>
 
         <Form onSubmit={handleSubmit}>
@@ -83,7 +83,11 @@ const HotelRegistration = () => {
             />
           </Form.Group>
 
-          <Button variant="danger" type="submit" className="w-100 fw-bold">
+          <Button
+            variant="warning"
+            type="submit"
+            className="w-100 fw-bold text-dark"
+          >
             Register
           </Button>
         </Form>
@@ -92,22 +96,24 @@ const HotelRegistration = () => {
       {/* Success Modal */}
       <Modal show={showModal} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Registration Successful 🎉</Modal.Title>
+          <Modal.Title className="text-warning fw-bold">
+            🎉 Registration Successful
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <p>
-            ✅ Your hotel registration request has been received successfully.
+            ✅ Your hotel registration has been received successfully.
           </p>
           <p>
-            🕒 <strong>Gujeny staff</strong> will visit your hotel within{' '}
-            <strong>7 days</strong> to verify your details.
+            🕒 <strong>Gujeney staff</strong> will visit within{' '}
+            <strong>7 days</strong> for verification.
           </p>
           <p>
-            Once approved, your hotel will appear in the Gujeny restaurant list.
+            Once approved, your hotel will appear in the Gujeney restaurant list.
           </p>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="success" onClick={handleClose}>
+          <Button variant="warning" className="text-dark" onClick={handleClose}>
             OK
           </Button>
         </Modal.Footer>

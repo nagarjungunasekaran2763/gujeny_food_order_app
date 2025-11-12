@@ -1,37 +1,59 @@
 import React, { useState } from 'react';
-import OrderModel from './OrderModel';
+import { Card, Button, InputGroup, FormControl } from 'react-bootstrap';
 
-const RestaurantCard = ({ r }) => {
-  const [showModal, setShowModal] = useState(false);
+export default function RestaurantCard({ meal, addToCart }) {
+  const [quantity, setQuantity] = useState(1);
 
   return (
-    <>
-      <div className="card h-100 shadow-sm">
-        <img
-          src={r.image}
-          className="card-img-top"
-          alt={r.name}
-          style={{ height: '200px', objectFit: 'cover' }}
-        />
-        <div className="card-body">
-          <h5 className="card-title">{r.name}</h5>
-          <p className="card-text text-muted">{r.cuisine.join(', ')}</p>
-          <button
-            className="btn btn-danger w-100"
-            onClick={() => setShowModal(true)}
-          >
-            Order Now
-          </button>
-        </div>
-      </div>
-
-      <OrderModel
-        show={showModal}
-        onClose={() => setShowModal(false)}
-        restaurant={r}
+    <Card className="shadow-sm mb-4 border-0" style={{ borderRadius: '15px' }}>
+      <Card.Img
+        variant="top"
+        src={meal.strMealThumb}
+        alt={meal.strMeal}
+        style={{
+          height: '200px',
+          objectFit: 'cover',
+          borderTopLeftRadius: '15px',
+          borderTopRightRadius: '15px',
+        }}
       />
-    </>
-  );
-};
+      <Card.Body className="text-center bg-light">
+        <Card.Title className="fw-bold text-dark">{meal.strMeal}</Card.Title>
+        <Card.Text className="text-muted mb-2">
+          {meal.strCategory} | {meal.strArea}
+        </Card.Text>
 
-export default RestaurantCard;
+        <InputGroup className="mb-2 justify-content-center">
+          <Button
+            variant="outline-secondary"
+            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+          >
+            -
+          </Button>
+          <FormControl
+            type="number"
+            value={quantity}
+            min={1}
+            className="text-center"
+            onChange={(e) => setQuantity(Number(e.target.value))}
+            style={{ maxWidth: '60px' }}
+          />
+          <Button
+            variant="outline-secondary"
+            onClick={() => setQuantity(quantity + 1)}
+          >
+            +
+          </Button>
+        </InputGroup>
+
+        <Button
+          variant="warning"
+          className="fw-bold text-dark px-4"
+          onClick={() => addToCart(meal, quantity)}
+        >
+          🛒 Add to Cart
+        </Button>
+      </Card.Body>
+    </Card>
+  );
+}

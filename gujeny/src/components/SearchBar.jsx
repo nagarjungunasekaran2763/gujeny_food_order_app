@@ -1,13 +1,16 @@
 import React from 'react';
 
-export default function SearchBar({ value, onChange }) {
+export default function SearchBar({ value = '', onChange }) {
   return (
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder="Search restaurants or cuisines..."
-      className="form-control"
-    />
+    <div className="mb-3">
+      <input
+        type="search"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Search restaurants or cuisines..."
+        className="form-control form-control-lg"
+        aria-label="Search restaurants or cuisines"
+      />
+    </div>
   );
 }
