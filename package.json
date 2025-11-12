@@ -1,5 +1,31 @@
 {
+<<<<<<< HEAD
   "dependencies": {
     "axios": "^1.13.2"
+=======
+  "name": "gujeny",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.16.0",
+    "bootstrap": "^5.3.8",
+    "react-bootstrap": "^2.10.10",
+    "react-icons": "^4.10.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.4",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.1",
+    "vite": "^4.4.9",
+    "eslint": "^9.36.0"
+>>>>>>> 073d01f76ccf19fcdf3059564229cba82329d8ba
   }
 }
