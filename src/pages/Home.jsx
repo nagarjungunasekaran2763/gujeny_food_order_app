@@ -6,6 +6,7 @@ import Header from '../components/Header';
 import SearchBar from '../components/SearchBar';
 import RestaurantCard from '../components/RestaurantCard';
 import Pagination from '../components/Pagination';
+import Filters from '../components/Filters.Jsx';
 import OrderModel from '../components/OrderModel';
 import Tracker from '../components/Tracker';
 
