@@ -4,6 +4,7 @@ import axios from 'axios';
 
 import Header from '../components/Header';
 import SearchBar from '../components/SearchBar';
+import Filters from '../components/Filters.Jsx';
 import RestaurantCard from '../components/RestaurantCard';
 import Pagination from '../components/Pagination';
 import OrderModel from '../components/OrderModel';
