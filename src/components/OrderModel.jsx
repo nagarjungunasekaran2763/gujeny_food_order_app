@@ -1,247 +1,168 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Modal, Button, Form, ProgressBar } from 'react-bootstrap';
 
-const OrderModel = ({ show, onClose, restaurant }) => {
-  const [orders, setOrders] = useState([
-    { name: restaurant.name, quantity: 1 },
-  ]);
-  const [userLocation, setUserLocation] = useState(null);
-  const [tracking, setTracking] = useState(false);
+export default function OrderModel({
+  show,
+  cartItems = [],
+  onClose,
+  clearCart,
+}) {
+  const [orderPlaced, setOrderPlaced] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [address, setAddress] = useState('');
+  const [location, setLocation] = useState(null); // {lat, lng}
 
-  // 🧩 Handle Quantity
-  const handleQuantityChange = (index, type) => {
-    const updated = [...orders];
-    if (type === 'inc') updated[index].quantity++;
-    else if (type === 'dec' && updated[index].quantity > 1)
-      updated[index].quantity--;
-    setOrders(updated);
-  };
+  const totalPrice = cartItems.reduce(
+    (total, item) => total + item.quantity * 100,
+    0
+  );
 
-  // ➕ Add another food item
-  const handleAddFood = () => {
-    setOrders([...orders, { name: '', quantity: 1 }]);
-  };
-
-  // 🔄 Update food name
-  const handleFoodNameChange = (index, value) => {
-    const updated = [...orders];
-    updated[index].name = value;
-    setOrders(updated);
-  };
-
-  // 📍 Location detect
-  const handleGetLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setUserLocation({
-            lat: pos.coords.latitude,
-            lon: pos.coords.longitude,
-          });
-          alert('📍 Location detected successfully!');
-        },
-        () => alert('❌ Please allow location access!')
-      );
-    } else {
-      alert('Geolocation not supported by this browser');
-    }
-  };
-
-  // 🚗 Submit
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!userLocation) {
-      alert('Please allow location access first!');
+  const detectLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser 😢');
       return;
     }
-    setTracking(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setAddress(''); // Clear textarea if location detected
+        alert('Location detected! 🚀');
+      },
+      () => alert('Unable to retrieve your location 😢')
+    );
   };
 
-  const dummyHotelLocation = { lat: 12.9716, lon: 77.5946 };
+  const handleOrder = () => {
+    if (!address.trim() && !location) {
+      alert('Please enter address or detect your location first! 📍');
+      return;
+    }
 
-  // 📏 Distance Calculation
-  const getDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371;
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLon = ((lon2 - lon1) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLon / 2) ** 2;
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return (R * c).toFixed(2);
+    setOrderPlaced(true);
+
+    // Save order to localStorage
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (currentUser) {
+      const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+      orders.push({
+        userId: currentUser.email || 'guest',
+        items: cartItems.map((item) => ({
+          idMeal: item.idMeal,
+          mealName: item.strMeal,
+          quantity: item.quantity,
+          price: item.quantity * 100,
+        })),
+        total: totalPrice,
+        address: address || `Lat: ${location.lat}, Lng: ${location.lng}`,
+        timestamp: Date.now(),
+        status: 'Preparing',
+      });
+      localStorage.setItem('orders', JSON.stringify(orders));
+    }
+
+    let step = 0;
+    const timer = setInterval(() => {
+      step += 10;
+      setProgress(Math.min(step, 100));
+      if (step >= 100) clearInterval(timer);
+    }, 500);
   };
+
+  useEffect(() => {
+    if (!show) {
+      setOrderPlaced(false);
+      setProgress(0);
+      setAddress('');
+      setLocation(null);
+    }
+  }, [show]);
 
   return (
-    <>
-      {show && (
-        <div className="modal show fade d-block" tabIndex="-1">
-          <div className="modal-dialog modal-dialog-centered modal-lg">
-            <div className="modal-content shadow">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  🧾 Multi Order from {restaurant.name}
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={onClose}
-                ></button>
+    <Modal show={show} onHide={onClose} centered>
+      <Modal.Header
+        closeButton
+        style={{ backgroundColor: '#FFD700', color: '#000' }}
+      >
+        <Modal.Title>🛒 Your Cart</Modal.Title>
+      </Modal.Header>
+      <Modal.Body style={{ backgroundColor: '#fffbea' }}>
+        {!orderPlaced ? (
+          <>
+            <h5>Order Summary:</h5>
+            {cartItems.map((item) => (
+              <div
+                key={item.idMeal}
+                className="d-flex justify-content-between mb-2"
+              >
+                <span>
+                  {item.strMeal} x {item.quantity}
+                </span>
+                <span>₹{item.quantity * 100}</span>
               </div>
-
-              <div className="modal-body">
-                {!tracking ? (
-                  <>
-                    <div className="text-center mb-3">
-                      <img
-                        src={restaurant.image}
-                        alt={restaurant.name}
-                        className="img-fluid rounded mb-2"
-                        style={{ maxHeight: '200px' }}
-                      />
-                      <h6>{restaurant.cuisine.join(', ')}</h6>
-                    </div>
-
-                    {/* ORDER FORM */}
-                    <form onSubmit={handleSubmit}>
-                      {orders.map((order, index) => (
-                        <div
-                          key={index}
-                          className="border rounded p-3 mb-3 bg-light"
-                        >
-                          <div className="d-flex justify-content-between align-items-center">
-                            <input
-                              type="text"
-                              className="form-control me-2"
-                              placeholder="Food Name"
-                              value={order.name}
-                              onChange={(e) =>
-                                handleFoodNameChange(index, e.target.value)
-                              }
-                              required
-                            />
-                            <div className="d-flex align-items-center gap-2">
-                              <button
-                                type="button"
-                                className="btn btn-outline-danger btn-sm"
-                                onClick={() =>
-                                  handleQuantityChange(index, 'dec')
-                                }
-                              >
-                                -
-                              </button>
-                              <span className="fw-bold">{order.quantity}</span>
-                              <button
-                                type="button"
-                                className="btn btn-outline-success btn-sm"
-                                onClick={() =>
-                                  handleQuantityChange(index, 'inc')
-                                }
-                              >
-                                +
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-
-                      {/* ➕ Add Another Food */}
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary w-100 mb-3"
-                        onClick={handleAddFood}
-                      >
-                        ➕ Add Another Food
-                      </button>
-
-                      {/* Customer Details */}
-                      <div className="mb-3">
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Your Name"
-                          required
-                        />
-                      </div>
-                      <div className="mb-3">
-                        <input
-                          type="tel"
-                          className="form-control"
-                          placeholder="Phone Number"
-                          required
-                        />
-                      </div>
-                      <div className="mb-3">
-                        <textarea
-                          className="form-control"
-                          placeholder="Delivery Address"
-                          required
-                        ></textarea>
-                      </div>
-                      <div className="mb-3">
-                        <select className="form-select" required>
-                          <option value="">Select Payment Method</option>
-                          <option value="COD">Cash on Delivery</option>
-                          <option value="UPI">UPI</option>
-                          <option value="Card">Card</option>
-                        </select>
-                      </div>
-
-                      <button
-                        type="button"
-                        className="btn btn-outline-primary w-100 mb-3"
-                        onClick={handleGetLocation}
-                      >
-                        📍 Detect My Location
-                      </button>
-
-                      <button type="submit" className="btn btn-danger w-100">
-                        Confirm Order
-                      </button>
-                    </form>
-                  </>
-                ) : (
-                  // ✅ Tracking Screen
-                  <div className="text-center">
-                    <h5>🚗 Tracking your multiple food orders...</h5>
-                    {userLocation && (
-                      <>
-                        <p className="mt-3">
-                          Distance from restaurant:{' '}
-                          <b>
-                            {getDistance(
-                              userLocation.lat,
-                              userLocation.lon,
-                              dummyHotelLocation.lat,
-                              dummyHotelLocation.lon
-                            )}{' '}
-                            km
-                          </b>
-                        </p>
-                        <h6 className="fw-bold mt-3">🧾 Your Orders:</h6>
-                        <ul className="list-group mb-3">
-                          {orders.map((o, i) => (
-                            <li
-                              key={i}
-                              className="list-group-item d-flex justify-content-between"
-                            >
-                              <span>{o.name}</span>
-                              <span>Qty: {o.quantity}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        <p>Estimated delivery time: 25 min</p>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
+            ))}
+            <div className="d-flex justify-content-between fw-bold mb-3">
+              <span>Total:</span>
+              <span>₹{totalPrice}</span>
             </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-};
 
-export default OrderModel;
+            <Form.Group className="mb-3">
+              <Form.Label>Delivery Address</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={2}
+                placeholder="Enter your delivery address..."
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                style={{ borderColor: '#ffb400' }}
+                disabled={!!location} // disable if location detected
+              />
+            </Form.Group>
+
+            <Button
+              variant={location ? 'success' : 'warning'}
+              className="w-100 mb-3 text-dark fw-bold"
+              onClick={detectLocation}
+            >
+              {location ? 'Location Detected ✅' : 'Detect Current Location 📍'}
+            </Button>
+
+            <Button
+              variant="warning"
+              className="w-100 text-dark fw-bold"
+              onClick={handleOrder}
+              disabled={!address.trim() && !location}
+            >
+              Confirm Order 🚀
+            </Button>
+          </>
+        ) : (
+          <>
+            <h5 className="text-center mt-2">Your order is on the way 🚗💨</h5>
+            <ProgressBar
+              animated
+              now={progress}
+              variant="warning"
+              className="my-3"
+              label={progress < 100 ? `${progress}%` : 'Delivered ✅'}
+            />
+            {progress >= 100 && (
+              <div className="text-center">
+                <h5 className="text-success fw-bold">Order Delivered ✅</h5>
+                <p>Enjoy your meal! 🍔🍟</p>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    clearCart();
+                    onClose();
+                  }}
+                >
+                  Close
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </Modal.Body>
+    </Modal>
+  );
+}
