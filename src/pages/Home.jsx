@@ -6,7 +6,6 @@ import Header from '../components/Header';
 import SearchBar from '../components/SearchBar';
 import RestaurantCard from '../components/RestaurantCard';
 import Pagination from '../components/Pagination';
-import Filters from '../components/Filters.Jsx';
 import OrderModel from '../components/OrderModel';
 import Tracker from '../components/Tracker';
 
@@ -16,7 +15,6 @@ export default function Home() {
   const [showCart, setShowCart] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCuisine, setSelectedCuisine] = useState(null);
   const [page, setPage] = useState(1);
   const [showTracker, setShowTracker] = useState(false);
   const [trackingMeal, setTrackingMeal] = useState(null);
@@ -59,13 +57,9 @@ export default function Home() {
     window.location.reload();
   };
 
-  const filteredMeals = meals
-    .filter((meal) =>
-      selectedCuisine ? meal.strArea === selectedCuisine : true
-    )
-    .filter((meal) =>
-      meal.strMeal.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+  const filteredMeals = meals.filter((meal) =>
+    meal.strMeal.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const totalPages = Math.ceil(filteredMeals.length / mealsPerPage);
   const displayedMeals = filteredMeals.slice(
@@ -94,11 +88,6 @@ export default function Home() {
         </div>
 
         <SearchBar value={searchQuery} onChange={setSearchQuery} />
-        <Filters
-          cuisines={[...new Set(meals.map((m) => m.strArea))]}
-          selectedCuisine={selectedCuisine}
-          onSelect={setSelectedCuisine}
-        />
 
         {loading ? (
           <div className="text-center mt-5">
@@ -126,6 +115,7 @@ export default function Home() {
           clearCart={clearCart}
         />
       )}
+
       {showTracker && (
         <Tracker
           restaurant={trackingMeal}
